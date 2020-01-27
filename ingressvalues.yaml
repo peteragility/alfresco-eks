@@ -1,0 +1,16 @@
+controller:
+  config:
+    ssl-redirect: "true"
+    server-tokens: "false"
+  scope:
+    enabled: true
+    namespace: acs
+  publishService:
+    enabled: true
+  service:
+    targetPorts:
+      https: 80
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+      service.beta.kubernetes.io/aws-load-balancer-ssl-ports: https
+      service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy: "ELBSecurityPolicy-TLS-1-2-2017-01"
