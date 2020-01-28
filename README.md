@@ -162,7 +162,7 @@ export DESIREDNAMESPACE=acs
 ```bash
 kubectl create namespace $DESIREDNAMESPACE
 ```
-4. Create the nginx ingress controller and AWS classic load balancer by:
+5. Create the nginx ingress controller and AWS classic load balancer by:
    - Replace **your-ssl-cert-arn** below with the ARN of the certificate from AWS Certificate Manager:
    ```bash
    export AWS_CERT_ARN="your-ssl-cert-arn"
@@ -171,7 +171,7 @@ kubectl create namespace $DESIREDNAMESPACE
    ```bash
    export AWS_EXT_URL="acs.compasshost.com"
    ```
-   - Install nginx ingress controller and AWS classic load balancer by below helm command:
+   - Install the ingress controller by the below helm command:
    ```bash
    helm install stable/nginx-ingress \
    --version 0.14.0 \
@@ -189,11 +189,11 @@ kubectl create namespace $DESIREDNAMESPACE
    --set controller.publishService.enabled=true \
    --namespace $DESIREDNAMESPACE
    ```
-5. Setup EFS with EKS cluster, please replace **efs-dns-name** with your EFS's DNS name:
+6. Setup EFS with EKS cluster, please replace **efs-dns-name** with your EFS's DNS name:
 ```bash
 helm install --set nfs.server=efs-dns-name --set nfs.path="/" stable/nfs-client-provisioner
 ```
-6.	Install docker by:
+7.	Install docker by:
 ```bash
 sudo yum install docker
 ```
@@ -202,7 +202,7 @@ sudo yum install docker
 docker login quay.io
 cat ~/.docker/config.json | base64
 ```
-9.	Create a file secrets.yaml with the following command, remember to replace "your-base64-string" with the string that generated in last step:
+9.	Create a file secrets.yaml with the following command, remember to replace **your-base64-string** with the string that generated in last step:
 ```bash
 cat <<EOF > secrets.yaml
 apiVersion: v1
@@ -216,6 +216,6 @@ data:
   .dockerconfigjson: your-base64-string
 EOF
 ```
-11.	Deploy the secret into the Kubernetes cluster:
+10.	Deploy the secret into the Kubernetes cluster:
 kubectl create -f secrets.yaml --namespace $DESIREDNAMESPACE
 
