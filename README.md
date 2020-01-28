@@ -124,8 +124,8 @@ chmod u+x install-helm.sh
 ```
 2. Use a kubectl command with an external YAML file to create role-based access control (RBAC) configuration for Tiller:
    - First, create the external YAML file:
-   ```
-   cat <<EOF > tiller-rbac-config.yaml
+   ```bash
+cat <<EOF > tiller-rbac-config.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -145,7 +145,7 @@ subjects:
     name: tiller
     namespace: kube-system
 EOF
-   ```
+```
    - Next, apply the RBAC configuration for Tiller via a kubectl command:
    ```
    kubectl create -f tiller-rbac-config.yaml
@@ -172,7 +172,7 @@ kubectl create namespace $DESIREDNAMESPACE
    export AWS_EXT_URL="acs.compasshost.com"
    ```
    - Install nginx ingress controller and AWS classic load balancer by below helm command:
-   ```
+   ```bash
    helm install stable/nginx-ingress \
 --version 0.14.0 \
 --set controller.scope.enabled=true \
@@ -203,7 +203,7 @@ docker login quay.io
 cat ~/.docker/config.json | base64
 ```
 9.	Create a file secrets.yaml with the following command, remember to replace "your-base64-string" with the string that generated in last step:
-```
+```bash
 cat <<EOF > secrets.yaml
 apiVersion: v1
 kind: Secret
