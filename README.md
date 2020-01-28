@@ -217,5 +217,8 @@ data:
 EOF
 ```
 10.	Deploy the secret into the Kubernetes cluster:
+```bash
 kubectl create -f secrets.yaml --namespace $DESIREDNAMESPACE
+```
+
 
