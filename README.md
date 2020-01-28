@@ -125,27 +125,27 @@ chmod u+x install-helm.sh
 2. Use a kubectl command with an external YAML file to create role-based access control (RBAC) configuration for Tiller:
    - First, create the external YAML file:
    ```bash
-cat <<EOF > tiller-rbac-config.yaml
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: tiller
-  namespace: kube-system
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: tiller
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-  - kind: ServiceAccount
-    name: tiller
-    namespace: kube-system
-EOF
-```
+   cat <<EOF > tiller-rbac-config.yaml
+   apiVersion: v1
+   kind: ServiceAccount
+   metadata:
+     name: tiller
+     namespace: kube-system
+   ---
+   apiVersion: rbac.authorization.k8s.io/v1beta1
+   kind: ClusterRoleBinding
+   metadata:
+     name: tiller
+   roleRef:
+     apiGroup: rbac.authorization.k8s.io
+     kind: ClusterRole
+     name: cluster-admin
+   subjects:
+     - kind: ServiceAccount
+       name: tiller
+       namespace: kube-system
+   EOF
+   ```
    - Next, apply the RBAC configuration for Tiller via a kubectl command:
    ```
    kubectl create -f tiller-rbac-config.yaml
