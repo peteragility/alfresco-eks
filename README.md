@@ -60,34 +60,45 @@ An EC2 instance (aka. operation instance) will be setup at the public subnet of 
 ## Setup AWS CLI, eksctl, kubectl and helm
 1. The following steps are done in the operation EC2 instance.
 2. Run the below command to install and upgrade AWS Command Line Tool (CLI)
-`pip install awscli –upgrade –user`
+```
+pip install awscli –upgrade –user
+```
 3. Setup AWS account credential for CLI by “AWS Configure”:
-`AWS Access Key ID [None]: <Your Access Key ID>`
-`AWS Secret Access Key [None]: <Your Access Key Secret>`
-`Default region name [None]: ap-east-1`
-`Default output format [None]: json`
+```
+AWS Access Key ID [None]: <Your Access Key ID>
+AWS Secret Access Key [None]: <Your Access Key Secret>
+Default region name [None]: ap-east-1
+Default output format [None]: json
+```
 4. Download and extract the latest release of eksctl with the following command:
-`curl --silent --location "https://github.com/weaveworks/eksctl/releases/download/latest_release/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp`
+```
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/download/latest_release/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+```
 5. Move the extracted binary to /usr/local/bin:
-`sudo mv /tmp/eksctl /usr/local/bin`
+```
+sudo mv /tmp/eksctl /usr/local/bin
+```
 6. Test that your installation was successful with the following command:
-`eksctl version`
+```
+eksctl version
+```
 7. Follow the below guide to setup kubectl, you should follow the guide for Linux and Kubernetes 1.14: https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html
 8. To setup authentication between kubectl and the EKS cluster, use the AWS CLI update-kubeconfig command to create kubeconfig for your cluster, please replace “alfresco-prod” with your EKS cluster name:
-`aws eks –region ap-east-1 update-kubeconfig –name alfresco-prod`
+```
+aws eks –region ap-east-1 update-kubeconfig –name alfresco-prod
+```
 9. Test your configuration:
-`kubectl get svc`
+```
+kubectl get svc
+```
 ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/kubectl9.png)
 10.	Run the following command to install helm, a package manager on Kubernetes:
-`curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > install-helm.sh`
-11. And run:
-`chmod u+x install-helm.sh`
-`./install-helm.sh`
-12. And finally run:
-`helm init --service-account tiller`
-
-
-
+```
+curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > install-helm.sh
+chmod u+x install-helm.sh
+./install-helm.sh
+helm init --service-account tiller
+```
 
 
 
