@@ -200,7 +200,7 @@ kubectl create namespace $DESIREDNAMESPACE
 
 6. Setup EFS with EKS cluster, please replace **efs-dns-name** with your EFS's DNS name:
 ```bash
-export $EFS_SERVER="efs-dns-name"
+export EFS_SERVER="efs-dns-name"
 
 helm install stable/nfs-client-provisioner \
 --name alfresco-nfs-provisioner \
