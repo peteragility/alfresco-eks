@@ -110,7 +110,7 @@ The Aurora database is used used to store meta-data of the documents in Alfresco
 6. Select the VPC of EKS cluster:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds7.png)
 7. Ensure security group of EKS cluster is added and create the database: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds7b.png)
 8. Wait for Aurora database cluster to create successfully:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds8.png)
-9. Click the database cluster name and you can see the "write" database endpoint.
+9. Click the database cluster name and you can see the "write" database endpoint at the bottom: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds9.png)
 
 ## AWS Certificate Manager Setup
 Data in transit between end user and alfresco system is protected by HTTPS, therefore a SSL/TLS certificate for the application domain is required.
