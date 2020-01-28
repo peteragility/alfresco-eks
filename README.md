@@ -195,7 +195,7 @@ kubectl create namespace $DESIREDNAMESPACE
    ```
    kubectl get pods --namespace acs
    ```
-   You should see 2 pods in `RUNNING` status
+   Keep checking until the two pods changed to `running` status
    - Goto EC2 dashboard in AWS console, click load balancer, you will see a load balancer is setup, drop down the DNS name of it.
 
 6. Setup EFS with EKS cluster, please replace **efs-dns-name** with your EFS's DNS name:
@@ -294,7 +294,7 @@ You can access all components of Alfresco Content Services Community using the s
 ```
 kubectl get pods --namespace acs
 ```
-Keep checking until all pods' status changed to `RUNNING`
+Keep checking until all pods' status changed to `Running`
 
 
 
