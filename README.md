@@ -20,3 +20,26 @@ Alfresco Content Services (ACS) is the Enterprise Content Management module of A
      - AmazonEC2ContainerRegistryReadOnly
    - At the final step give the role a name “NodeInstanceRole” and create role: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/nodeinstancerole2.png)
 
+8. Create EC2 key pair for the EKS worker node:
+   - Goto EC2 in AWS console, click “key pair” at the left menu: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/ec2keypair.png)
+   - Input the name and create key pair: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/ec2keypair2.png)
+
+
+## Amazon EKS Cluster Setup
+1. Goto “EKS” in AWS console, ensure selected region is Hong Kong: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks1.png)
+2. Input the followings:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks2.png)
+3. Select the pre-defined VPC and subnets for the EKS cluster:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks3.png)
+4. Set the cluster security group, pick the default is fine:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks4.png)
+5. Allow private access to API server endpoint only:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks5.png)
+6. Set the below logging options and create the cluster:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks6.png)
+7. Wait for successful creation of cluster, which means cluster status = “active”:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks7.png)
+8. Scroll down to “Node Groups” and click “Add node group”:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks8.png)
+9. Set node group configuration, ensure multiple subnets are selected:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks9.png)
+10. Input SSH key pair for EKS worker nodes:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks10.png)
+11. Set worker node compute configuration:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks11.png)
+12.	Set scaling configuration:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks12.png)
+13. Final step is review the group configuration and create, wait for the node group status become “active”:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks13.png)
+14. Goto EC2 dashboard, there should be 3 EC2 instances running:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks14.png)
+15. Now the EKS cluster setup is completed.
+
+
