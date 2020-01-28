@@ -98,6 +98,7 @@ EFS is mainly used to store the full text indexes of documents stored in Alfresc
 1. Goto EFS in AWS console, select the VPC of EKS cluster and click all AZs: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/efs1.png)
 2. Follow the setup process and create the EFS:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/efs2.png)
 3. After EFS is created please drop down the EFS DNS name:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/efs3.png)
+4. Goto File Systems -> Manage file system access, add the EKS cluster security group to all mount targets: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/efs4.png)
 
 ## Amazon Aurora (PostgreSQL) Setup
 The Aurora database is used used to store meta-data of the documents in Alfresco content services.
@@ -241,13 +242,14 @@ export EXTERNALHOST="myacs.example.com"
 # Replace efs-dns-name with EFS DNS Name
 export EFS_SERVER="efs-dns-name"
 
-# Alfresco Admin password should be encoded in MD5 Hash
-# Replace MyAdminPwd! with the admin password you want
-export ALF_ADMIN_PWD=$(printf %s 'MyAdminPwd!' | iconv -t UTF-16LE | openssl md4 | awk '{ print $1}')
+# Alfresco Admin password is encoded in MD4, set the default admin password to "alfrescopoc!"
+export ALF_ADMIN_PWD="301aecafe3dc996e59de880cc5a8a8d4"
 
-# Alfresco Database (Postgresql) password
-export ALF_DB_URL='jdbc:postgresql://alfresco.cluster-cwdhvtioj6ah.ap-east-1.rds.amazonaws.com:5432'
+# Alfresco RDS database endpoint
+export ALF_DB_URL='alfresco.cluster-abcdefg.ap-east-1.rds.amazonaws.com:5432'
+# Alfresco RDS database username
 export ALF_DB_USER='alfresco'
+# Alfresco RDS database password
 export ALF_DB_PWD='alfrescopoc'
 
 # Install ACS on EKS cluster with external database point to RDS Aurora (PostgreSQL)
@@ -267,7 +269,7 @@ helm install alfresco-incubator/alfresco-content-services \
 --set database.driver="org.postgresql.Driver" \
 --set database.user="$ALF_DB_USER" \
 --set database.password="$ALF_DB_PWD" \
---set database.url="$ALF_DB_URL" \
+--set database.url="jdbc:postgresql://$ALF_DB_URL" \
 --set global.alfrescoRegistryPullSecrets=quay-registry-secret \
 --namespace=$DESIREDNAMESPACE
 ```
