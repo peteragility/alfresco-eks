@@ -167,9 +167,9 @@ kubectl create namespace $DESIREDNAMESPACE
    ```bash
    export AWS_CERT_ARN="your-ssl-cert-arn"
    ```
-   - Replace **acs.compasshost.com** below with the external URL of Alfresco content services:
+   - Replace **myacs.example.com** below with the hostname of Alfresco content services:
    ```bash
-   export AWS_EXT_URL="acs.compasshost.com"
+   export AWS_EXT_URL="myacs.example.com"
    ```
    - Install the ingress controller by the below helm command:
    ```bash
@@ -231,28 +231,43 @@ helm repo add alfresco-stable https://kubernetes-charts.alfresco.com/stable
 ```
 13. Deploy Alfresco Content Services using the following set of commands:
 ```bash
+# Replace acs with namespace of ACS
+export DESIREDNAMESPACE=acs
+
 # DNS name of the ACS cluster or the AWS ELB DNS name if you do not intend to create one.
-# export EXTERNALHOST="$ELBADDRESS"
+# Replace myacs.example.com with your hostname of alfresco content services
 export EXTERNALHOST="myacs.example.com"
 
+# Replace efs-dns-name with EFS DNS Name
+export EFS_SERVER="efs-dns-name"
+
 # Alfresco Admin password should be encoded in MD5 Hash
+# Replace MyAdminPwd! with the admin password you want
 export ALF_ADMIN_PWD=$(printf %s 'MyAdminPwd!' | iconv -t UTF-16LE | openssl md4 | awk '{ print $1}')
 
 # Alfresco Database (Postgresql) password
-export ALF_DB_PWD='MyDbPwd'
+export ALF_DB_URL='jdbc:postgresql://alfresco.cluster-cwdhvtioj6ah.ap-east-1.rds.amazonaws.com:5432'
+export ALF_DB_USER='alfresco'
+export ALF_DB_PWD='alfrescopoc'
 
-# Install ACS
+# Install ACS on EKS cluster with external database point to RDS Aurora (PostgreSQL)
 helm install alfresco-incubator/alfresco-content-services \
 --set externalProtocol="https" \
 --set externalHost="$EXTERNALHOST" \
 --set externalPort="443" \
 --set repository.adminPassword="$ALF_ADMIN_PWD" \
---set alfresco-infrastructure.persistence.storageClass.enabled=true \
---set alfresco-infrastructure.persistence.storageClass.name="nfs-client" \
---set alfresco-infrastructure.alfresco-infrastructure.nginx-ingress.enabled=false \
+--set alfresco-infrastructure.persistence.efs.enabled=true \
+--set alfresco-infrastructure.persistence.efs.dns="$EFS_SERVER" \
 --set alfresco-search.resources.requests.memory="2500Mi",alfresco-search.resources.limits.memory="2500Mi" \
 --set alfresco-search.environment.SOLR_JAVA_MEM="-Xms2000M -Xmx2000M" \
---set postgresql.postgresPassword="$ALF_DB_PWD" \
+--set persistence.repository.data.subPath="$DESIREDNAMESPACE/alfresco-content-services/repository-data" \
+--set persistence.solr.data.subPath="$DESIREDNAMESPACE/alfresco-content-services/solr-data" \
+--set postgresql.enabled=false \
+--set database.external=true \
+--set database.driver="org.postgresql.Driver" \
+--set database.user="$ALF_DB_USER" \
+--set database.password="$ALF_DB_PWD" \
+--set database.url="$ALF_DB_URL" \
 --set global.alfrescoRegistryPullSecrets=quay-registry-secret \
 --namespace=$DESIREDNAMESPACE
 ```
