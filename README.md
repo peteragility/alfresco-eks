@@ -247,11 +247,11 @@ export EFS_SERVER="efs-dns-name"
 export ALF_ADMIN_PWD="301aecafe3dc996e59de880cc5a8a8d4"
 
 # Alfresco RDS database endpoint
-export ALF_DB_URL='alfresco.cluster-abcdefg.ap-east-1.rds.amazonaws.com:5432'
+export ALF_DB_URL="alfresco.cluster-abcdefg.ap-east-1.rds.amazonaws.com:5432"
 # Alfresco RDS database username
-export ALF_DB_USER='alfresco'
+export ALF_DB_USER="alfresco"
 # Alfresco RDS database password
-export ALF_DB_PWD='alfrescopoc'
+export ALF_DB_PWD="alfrescopoc"
 
 # Install ACS on EKS cluster with external database point to RDS Aurora (PostgreSQL)
 helm install alfresco-incubator/alfresco-content-services \
@@ -274,5 +274,13 @@ helm install alfresco-incubator/alfresco-content-services \
 --set global.alfrescoRegistryPullSecrets=quay-registry-secret \
 --namespace=$DESIREDNAMESPACE
 ```
+14. You will set the below output at the end:
+```
+You can access all components of Alfresco Content Services Community using the same root address, but different paths as follows:
 
-
+  Content: https://myacs.exmaple.com:443/alfresco
+  Share: https://myacs.exmaple.com:443/share
+  Api-Explorer: https://myacs.exmaple.com:443/api-explorer
+  Sync service: https://myacs.exmaple.com:443/syncservice/healthcheck 
+```
+15. 
