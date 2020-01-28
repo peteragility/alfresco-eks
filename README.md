@@ -220,5 +220,41 @@ EOF
 ```bash
 kubectl create -f secrets.yaml --namespace $DESIREDNAMESPACE
 ```
+11. You should see the following output:
+```
+secret "quay-registry-secret" created
+```
+12. Add the Alfresco Helm charts repository:
+```bash
+helm repo add alfresco-incubator https://kubernetes-charts.alfresco.com/incubator
+helm repo add alfresco-stable https://kubernetes-charts.alfresco.com/stable
+```
+13. Deploy Alfresco Content Services using the following set of commands:
+```bash
+# DNS name of the ACS cluster or the AWS ELB DNS name if you do not intend to create one.
+# export EXTERNALHOST="$ELBADDRESS"
+export EXTERNALHOST="myacs.example.com"
+
+# Alfresco Admin password should be encoded in MD5 Hash
+export ALF_ADMIN_PWD=$(printf %s 'MyAdminPwd!' | iconv -t UTF-16LE | openssl md4 | awk '{ print $1}')
+
+# Alfresco Database (Postgresql) password
+export ALF_DB_PWD='MyDbPwd'
+
+# Install ACS
+helm install alfresco-incubator/alfresco-content-services \
+--set externalProtocol="https" \
+--set externalHost="$EXTERNALHOST" \
+--set externalPort="443" \
+--set repository.adminPassword="$ALF_ADMIN_PWD" \
+--set alfresco-infrastructure.persistence.storageClass.enabled=true \
+--set alfresco-infrastructure.persistence.storageClass.name="nfs-client" \
+--set alfresco-infrastructure.alfresco-infrastructure.nginx-ingress.enabled=false \
+--set alfresco-search.resources.requests.memory="2500Mi",alfresco-search.resources.limits.memory="2500Mi" \
+--set alfresco-search.environment.SOLR_JAVA_MEM="-Xms2000M -Xmx2000M" \
+--set postgresql.postgresPassword="$ALF_DB_PWD" \
+--set global.alfrescoRegistryPullSecrets=quay-registry-secret \
+--namespace=$DESIREDNAMESPACE
+```
 
 
