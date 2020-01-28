@@ -42,4 +42,20 @@ Alfresco Content Services (ACS) is the Enterprise Content Management module of A
 14. Goto EC2 dashboard, there should be 3 EC2 instances running:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks14.png)
 15. Now the EKS cluster setup is completed.
 
+## Operation EC2 Instance Setup
+An EC2 instance (aka. operation instance) will be setup at the public subnet of the EKS cluster's VPC, so that user from external networks can remote SSH to it and manage the EKS cluster using command line tool like eksctl, kubectl and helm.
+
+1. Goto EC2 dashboard, click “launch instance”
+2. Search “ami-03a9535798e343119”, this is a Linux AMI for the Bastion Host:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion2.png)
+3. Select instance type , t3.micro should be fine:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion3.png)
+4. Ensure a public subnet is selected:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion4.png)
+5. Add 30GB storage:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion5.png)
+6. Set security group, to allow SSH inbound traffic from internet:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion6.png)
+7. Create a key-pair and launch the instance:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion7.png)
+8. Check if the instance start successfully:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion8.png)
+9. Click actions  networking  change security groups, add the instance to the EKS worker node security group as well.
+10. Click the instance and click connect, follow the instruction there to SSH to the Bastion host.
+11. If fail to connect pls check the subnet’s route table if there is a route to internet gateway, also check if the bastion host has a public DNS name and IP.
+
+
 
