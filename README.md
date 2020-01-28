@@ -8,7 +8,7 @@ Alfresco Content Services (ACS) is the Enterprise Content Management module of A
 2. Please request AWS account user's access key ID and secret from account admin, they are required for authentication in AWS command line tool (CLI)
 3. Please request Quay.io credentials by logging a ticket in Alfresco support center, which is required to pull ACS docker images from Quay.io repository.
 4. Please discuss with your AWS account's admin to decide and setup the CIDR range of the VPC and subnets that the EKS cluster will sit, it is suggested to create one subnet for each AZ in the region, i.e. 3 subnets.
-5. Ensure "DNS resolution"  and "DNS hostnames" are enabled in the VPC.
+5. Ensure "DNS resolution"  and "DNS hostnames" are enabled in the VPC, and the subnets' route table has a 0.0.0.0/0 to internet gateway, i,e, they are public subnets.
 6. Create IAM role "eks-control-role", which will be assumed by the EKS cluster:
    - Goto IAM in AWS console, select service: EKS and click “EKS” in use case and click “Next”: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks-control-role.png)
    - Keep click “next” and at the final step input the role name: “eks-control-role” and click “Create Role”: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks-control-role-2.png)
@@ -191,6 +191,13 @@ kubectl create namespace $DESIREDNAMESPACE
    --set controller.publishService.enabled=true \
    --namespace $DESIREDNAMESPACE
    ```
+   - Check nginx-ingress installed successfully by:
+   ```
+   kubectl get pods --namespace acs
+   ```
+   You should see 2 pods in `RUNNING` status
+   - Goto EC2 dashboard in AWS console, click load balancer, you will see a load balancer is setup, drop down the DNS name of it.
+
 6. Setup EFS with EKS cluster, please replace **efs-dns-name** with your EFS's DNS name:
 ```bash
 helm install --set nfs.server=efs-dns-name --set nfs.path="/" stable/nfs-client-provisioner
@@ -274,7 +281,7 @@ helm install alfresco-incubator/alfresco-content-services \
 --set global.alfrescoRegistryPullSecrets=quay-registry-secret \
 --namespace=$DESIREDNAMESPACE
 ```
-14. You will set the below output at the end:
+14. You will see the following output at the end:
 ```
 You can access all components of Alfresco Content Services Community using the same root address, but different paths as follows:
 
@@ -283,4 +290,13 @@ You can access all components of Alfresco Content Services Community using the s
   Api-Explorer: https://myacs.exmaple.com:443/api-explorer
   Sync service: https://myacs.exmaple.com:443/syncservice/healthcheck 
 ```
-15. 
+15. Check the installation status by following command:
+```
+kubectl get pods --namespace acs
+```
+Keep checking until all pods' status changed to `RUNNING`
+
+
+
+
+
