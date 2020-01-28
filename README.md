@@ -60,35 +60,35 @@ An EC2 instance (aka. operation instance) will be setup at the public subnet of 
 ## Setup AWS CLI, eksctl, kubectl and helm
 1. The following steps are done in the operation EC2 instance.
 2. Run the below command to install and upgrade AWS Command Line Tool (CLI)
-```
+```bash
 pip install awscli –upgrade –user
 ```
 3. Setup AWS account credential for CLI by “AWS Configure”:
-```
+```bash
 AWS Access Key ID [None]: <Your Access Key ID>
 AWS Secret Access Key [None]: <Your Access Key Secret>
 Default region name [None]: ap-east-1
 Default output format [None]: json
 ```
 4. Download and extract the latest release of eksctl with the following command:
-```
+```bash
 curl --silent --location "https://github.com/weaveworks/eksctl/releases/download/latest_release/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
 ```
 5. Move the extracted binary to /usr/local/bin:
-```
+```bash
 sudo mv /tmp/eksctl /usr/local/bin
 ```
 6. Test that your installation was successful with the following command:
-```
+```bash
 eksctl version
 ```
 7. Follow the below guide to setup kubectl, for Linux and Kubernetes 1.14: https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html
 8. To setup authentication between kubectl and the EKS cluster, use the AWS CLI update-kubeconfig command to create kubeconfig for your cluster, please replace **alfresco-prod** with your EKS cluster name:
-```
+```bash
 aws eks –region ap-east-1 update-kubeconfig –name alfresco-prod
 ```
 9. Test your configuration:
-```
+```bash
 kubectl get svc
 ```
 ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/kubectl9.png)
@@ -117,7 +117,7 @@ Data in transit between end user and alfresco system is protected by HTTPS, ther
  
 ## Alfresco Content Services Setup
 1. Run the following command to install helm, a package manager on Kubernetes:
-```
+```bash
 curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > install-helm.sh
 chmod u+x install-helm.sh
 ./install-helm.sh
@@ -147,58 +147,58 @@ chmod u+x install-helm.sh
    EOF
    ```
    - Next, apply the RBAC configuration for Tiller via a kubectl command:
-   ```
+   ```bash
    kubectl create -f tiller-rbac-config.yaml
    ```
    Finally initialize tiller:
-   ```
+   ```bash
    helm init --service-account tiller
    ```
 3. Set the namespace variable for Alfresco content services, replace **acs** below with your prefered name:
-```
+```bash
 export DESIREDNAMESPACE=acs
 ```
 4. Create the namespace in the EKS cluster:
-```
+```bash
 kubectl create namespace $DESIREDNAMESPACE
 ```
 4. Create the nginx ingress controller and AWS classic load balancer by:
    - Replace **your-ssl-cert-arn** below with the ARN of the certificate from AWS Certificate Manager:
-   ```
+   ```bash
    export AWS_CERT_ARN="your-ssl-cert-arn"
    ```
    - Replace **acs.compasshost.com** below with the external URL of Alfresco content services:
-   ```
+   ```bash
    export AWS_EXT_URL="acs.compasshost.com"
    ```
    - Install nginx ingress controller and AWS classic load balancer by below helm command:
    ```bash
    helm install stable/nginx-ingress \
---version 0.14.0 \
---set controller.scope.enabled=true \
---set controller.scope.namespace=$DESIREDNAMESPACE \
---set rbac.create=true \
---set controller.config."force-ssl-redirect"=\"true\" \
---set controller.config."server-tokens"=\"false\" \
---set controller.service.targetPorts.https=80 \
---set controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-backend-protocol"="http" \
---set controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-ssl-ports"="https" \
---set controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-ssl-cert"=$AWS_CERT_ARN \
---set controller.service.annotations."external-dns\.alpha\.kubernetes\.io/hostname"=$AWS_EXT_URL \
---set controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-ssl-negotiation-policy"="ELBSecurityPolicy-TLS-1-2-2017-01" \
---set controller.publishService.enabled=true \
---namespace $DESIREDNAMESPACE
+   --version 0.14.0 \
+   --set controller.scope.enabled=true \
+   --set controller.scope.namespace=$DESIREDNAMESPACE \
+   --set rbac.create=true \
+   --set controller.config."force-ssl-redirect"=\"true\" \
+   --set controller.config."server-tokens"=\"false\" \
+   --set controller.service.targetPorts.https=80 \
+   --set controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-backend-protocol"="http" \
+   --set controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-ssl-ports"="https" \
+   --set controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-ssl-cert"=$AWS_CERT_ARN \
+   --set controller.service.annotations."external-dns\.alpha\.kubernetes\.io/hostname"=$AWS_EXT_URL \
+   --set controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-ssl-negotiation-policy"="ELBSecurityPolicy-TLS-1-2-2017-01" \
+   --set controller.publishService.enabled=true \
+   --namespace $DESIREDNAMESPACE
    ```
-5. Setup EFS with EKS cluster, please replace **<efs-dns-name>** with your EFS's DNS name:
+5. Setup EFS with EKS cluster, please replace **efs-dns-name** with your EFS's DNS name:
+```bash
+helm install --set nfs.server=efs-dns-name --set nfs.path="/" stable/nfs-client-provisioner
 ```
-helm install --set nfs.server=<efs-dns-name> --set nfs.path="/" stable/nfs-client-provisioner
-```
-7.	Install docker by:
-```
+6.	Install docker by:
+```bash
 sudo yum install docker
 ```
 8.	Login to Quay.io and generate a base64 value for your dockercfg using one of the following methods, this will allow Kubernetes to access Quay.io:
-```
+```bash
 docker login quay.io
 cat ~/.docker/config.json | base64
 ```
