@@ -92,13 +92,130 @@ aws eks –region ap-east-1 update-kubeconfig –name alfresco-prod
 kubectl get svc
 ```
 ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/kubectl9.png)
-10.	Run the following command to install helm, a package manager on Kubernetes:
+
+## Amazon Elastic File System (EFS) Setup
+EFS is mainly used to store the full text indexes of documents stored in Alfresco content services (the Solr Indexes)
+1. Goto EFS in AWS console, select the VPC of EKS cluster and click all AZs: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/efs1.png)
+2. Follow the setup process and create the EFS:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/efs2.png)
+3. After EFS is created please drop down the EFS DNS name:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/efs3.png)
+
+## Amazon Aurora (PostgreSQL) Setup
+The Aurora database is used used to store meta-data of the documents in Alfresco content services.
+1. Goto RDS in AWS console, click “create database” and choose engine type = “Aurora”:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds2.png)
+2. Choose Amazon Aurora with PostgreSQL compatibility:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds3.png)
+3. Input DB cluster name, master username and password, ensure you remember all of these:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds4.png)
+4. Choose the instance type:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds5.png)
+5. No need to create Aurora Replica:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds6.png)
+6. Select the VPC of EKS cluster and create database:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds7.png)
+7. Wait for Aurora database cluster to create successfully:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds8.png)
+8. Click the database cluster name and drop down the database endpoints.
+
+## AWS Certificate Manager Setup
+Data in transit between end user and alfresco system is protected by HTTPS, therefore a SSL/TLS certificate for the application domain is required.
+1. Go to ACM in AWS console, choose provision a SSL/TLS certificate, and request a public certificate or import an existing one.
+2. After the certificate is issued/imported, drop down the ARN:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/acm3.png)
+ 
+## Alfresco Content Services Setup
+1. Run the following command to install helm, a package manager on Kubernetes:
 ```
 curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > install-helm.sh
 chmod u+x install-helm.sh
 ./install-helm.sh
-helm init --service-account tiller
 ```
-
-
+2. Use a kubectl command with an external YAML file to create role-based access control (RBAC) configuration for Tiller:
+   - First, create the external YAML file:
+   ```
+   cat <<EOF > tiller-rbac-config.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tiller
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: tiller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: tiller
+    namespace: kube-system
+EOF
+   ```
+   - Next, apply the RBAC configuration for Tiller via a kubectl command:
+   ```
+   kubectl create -f tiller-rbac-config.yaml
+   ```
+   Finally initialize tiller:
+   ```
+   helm init --service-account tiller
+   ```
+3. Set the namespace variable for Alfresco content services, replace **acs** below with your prefered name:
+```
+export DESIREDNAMESPACE=acs
+```
+4. Create the namespace in the EKS cluster:
+```
+kubectl create namespace $DESIREDNAMESPACE
+```
+4. Create the nginx ingress controller and AWS classic load balancer by:
+   - Replace **your-ssl-cert-arn** below with the ARN of the certificate from AWS Certificate Manager:
+   ```
+   export AWS_CERT_ARN="your-ssl-cert-arn"
+   ```
+   - Replace **acs.compasshost.com** below with the external URL of Alfresco content services:
+   ```
+   export AWS_EXT_URL="acs.compasshost.com"
+   ```
+   - Install nginx ingress controller and AWS classic load balancer by below helm command:
+   ```
+   helm install stable/nginx-ingress \
+--version 0.14.0 \
+--set controller.scope.enabled=true \
+--set controller.scope.namespace=$DESIREDNAMESPACE \
+--set rbac.create=true \
+--set controller.config."force-ssl-redirect"=\"true\" \
+--set controller.config."server-tokens"=\"false\" \
+--set controller.service.targetPorts.https=80 \
+--set controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-backend-protocol"="http" \
+--set controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-ssl-ports"="https" \
+--set controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-ssl-cert"=$AWS_CERT_ARN \
+--set controller.service.annotations."external-dns\.alpha\.kubernetes\.io/hostname"=$AWS_EXT_URL \
+--set controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-ssl-negotiation-policy"="ELBSecurityPolicy-TLS-1-2-2017-01" \
+--set controller.publishService.enabled=true \
+--namespace $DESIREDNAMESPACE
+   ```
+5. Setup EFS with EKS cluster, please replace **<efs-dns-name>** with your EFS's DNS name:
+```
+helm install --set nfs.server=<efs-dns-name> --set nfs.path="/" stable/nfs-client-provisioner
+```
+7.	Install docker by:
+```
+sudo yum install docker
+```
+8.	Login to Quay.io and generate a base64 value for your dockercfg using one of the following methods, this will allow Kubernetes to access Quay.io:
+```
+docker login quay.io
+cat ~/.docker/config.json | base64
+```
+9.	Create a file secrets.yaml with the following command, remember to replace "your-base64-string" with the string that generated in last step:
+```
+cat <<EOF > secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: quay-registry-secret
+type: kubernetes.io/dockerconfigjson
+data:
+# Docker registries config json in base64 - to do this, run:
+# cat ~/.docker/config.json | base64
+  .dockerconfigjson: your-base64-string
+EOF
+```
+11.	Deploy the secret into the Kubernetes cluster:
+kubectl create -f secrets.yaml --namespace $DESIREDNAMESPACE
 
