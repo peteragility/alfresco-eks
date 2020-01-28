@@ -98,7 +98,7 @@ EFS is mainly used to store the full text indexes of documents stored in Alfresc
 1. Goto EFS in AWS console, select the VPC of EKS cluster and click all AZs: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/efs1.png)
 2. Follow the setup process and create the EFS:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/efs2.png)
 3. After EFS is created please drop down the EFS DNS name:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/efs3.png)
-4. Goto File Systems -> Manage file system access, add the EKS cluster security group to all mount targets: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/efs4.png)
+4. Click Actions -> Manage network access, add the EKS cluster security group to all mount targets: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/efs4.png)
 
 ## Amazon Aurora (PostgreSQL) Setup
 The Aurora database is used used to store meta-data of the documents in Alfresco content services.
@@ -107,9 +107,10 @@ The Aurora database is used used to store meta-data of the documents in Alfresco
 3. Input DB cluster name, master username and password, ensure you remember all of these:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds4.png)
 4. Choose the instance type:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds5.png)
 5. No need to create Aurora Replica:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds6.png)
-6. Select the VPC of EKS cluster and create database:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds7.png)
-7. Wait for Aurora database cluster to create successfully:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds8.png)
-8. Click the database cluster name and drop down the database endpoints.
+6. Select the VPC of EKS cluster:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds7.png)
+7. Ensure security group of EKS cluster is added and create the database: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds7b.png)
+8. Wait for Aurora database cluster to create successfully:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds8.png)
+9. Click the database cluster name and you can see the "write" database endpoint.
 
 ## AWS Certificate Manager Setup
 Data in transit between end user and alfresco system is protected by HTTPS, therefore a SSL/TLS certificate for the application domain is required.
