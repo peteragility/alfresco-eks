@@ -82,8 +82,8 @@ sudo mv /tmp/eksctl /usr/local/bin
 ```
 eksctl version
 ```
-7. Follow the below guide to setup kubectl, you should follow the guide for Linux and Kubernetes 1.14: https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html
-8. To setup authentication between kubectl and the EKS cluster, use the AWS CLI update-kubeconfig command to create kubeconfig for your cluster, please replace “alfresco-prod” with your EKS cluster name:
+7. Follow the below guide to setup kubectl, for Linux and Kubernetes 1.14: https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html
+8. To setup authentication between kubectl and the EKS cluster, use the AWS CLI update-kubeconfig command to create kubeconfig for your cluster, please replace **alfresco-prod** with your EKS cluster name:
 ```
 aws eks –region ap-east-1 update-kubeconfig –name alfresco-prod
 ```
