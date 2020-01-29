@@ -208,7 +208,7 @@ helm install stable/nfs-client-provisioner \
 --set nfs.server="$EFS_SERVER" \
 --set nfs.path="/" \
 --set storageClass.name="nfs-client" \
---set storageClass.archiveOnDelete=false \
+--set storageClass.archiveOnDelete=false
 ```
 7.	Install docker by:
 ```bash
