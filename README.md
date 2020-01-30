@@ -311,11 +311,10 @@ You can access all components of Alfresco Content Services Community using the s
   Api-Explorer: https://myacs.exmaple.com:443/api-explorer
   Sync service: https://myacs.exmaple.com:443/syncservice/healthcheck 
 ```
-15. Check the installation status by following command, replace **acs** with your EKS cluster name
+15. Check the installation status by following command, replace **acs** with your EKS cluster name, Keep checking until all pods' status changed to `Running`
 ```
 kubectl get pods --namespace acs
 ```
-Keep checking until all pods' status changed to `Running`
 16. Go to the external host site, for example: https://myacs.myexample.com/share, the Alfresco content services site should be up and running.
 
 
