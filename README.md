@@ -1,13 +1,13 @@
 # Setup Alfresco Content Services (ACS) v6.2 on AWS EKS
 
 ## Overview
-Alfresco Content Services (ACS) is the Enterprise Content Management module of Alfresco Digital Business Platform, which is running on a set of containerized applications on Kubernetes. This document explains how to setup a Kubernetes cluster on AWS's managed Kubernetes platform: EKS, with step by step guides to setup ACS on EKS cluster, using tool like eksctl, kubectl and helm.
+Alfresco Content Services (ACS) is the Enterprise Content Management module of Alfresco Digital Business Platform, which is running on a set of containerized applications on Kubernetes. This document explains how to setup a Kubernetes cluster on AWS's managed Kubernetes platform: EKS, with step by step guides to setup ACS 6.2 on EKS cluster, using tool like eksctl, kubectl and helm.
 
 ## Prerequisites
 1. The setup is based on AWS's Hong Kong region.
-2. Please request AWS account user's access key ID and secret from account admin, they are required for authentication in AWS command line tool (CLI)
+2. Please request AWS account user's access key ID and secret from account admin, they are required for authentication in AWS command line tool (CLI), admin can goto AWS Console -> IAM -> Users -> Security Credentials -> Access Key to create access key.
 3. Please request Quay.io credentials by logging a ticket in Alfresco support center, which is required to pull ACS docker images from Quay.io repository.
-4. Please discuss with your AWS account's admin to decide and setup the CIDR range of the VPC and subnets that the EKS cluster will sit, it is suggested to create one subnet for each AZ in the region, i.e. 3 subnets.
+4. Please discuss with your AWS account's admin to decide and setup the CIDR range of the VPC and subnets that the EKS cluster will sit, it is suggested to create one subnet per each AZ in the region.
 5. Ensure "DNS resolution"  and "DNS hostnames" are enabled in the VPC, and the subnets' route table has a 0.0.0.0/0 route to internet gateway, i,e, they are public subnets.
 6. Create IAM role "eks-control-role", which will be assumed by the EKS cluster:
    - Goto IAM in AWS console, select service: EKS and click “EKS” in use case and click “Next”: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks-control-role.png)
@@ -18,49 +18,51 @@ Alfresco Content Services (ACS) is the Enterprise Content Management module of A
      - AmazonEKSWorkerNodePolicy
      - AmazonEKS_CNI_Policy
      - AmazonEC2ContainerRegistryReadOnly
+     - AmazonS3FullAccess
    - At the final step give the role a name “NodeInstanceRole” and create role: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/nodeinstancerole2.png)
 
 8. Create EC2 key pair for the EKS worker node:
    - Goto EC2 in AWS console, click “key pair” at the left menu: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/ec2keypair.png)
    - Input the name and create key pair: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/ec2keypair2.png)
 
-
-## Bastion Host Setup
-A Bastion Host (an EC2 instance) is setup in a public subnet of the EKS cluster's VPC, so that user from external networks can remote SSH to it and manage the EKS cluster using command line tool like eksctl, kubectl and helm.
-
-1. Goto EC2 dashboard, click “launch instance”
-2. Search “ami-03a9535798e343119”, this is a Linux AMI for a Bastion Host:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion2.png)
-3. Select instance type , t3.micro should be fine:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion3.png)
-4. Ensure a public subnet is selected:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion4.png)
-5. Add 30GB storage:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion5.png)
-6. Set security group, to allow SSH inbound traffic from internet:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion6.png)
-7. Create a key-pair and launch the instance:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion7.png)
-8. Check if the instance start successfully:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion8.png)
-9. Click actions -> networking -> change security groups, add the instance to the EKS worker node security group as well.
-10. Click the instance and click connect, follow the instruction there to SSH to the EC2 instance.
-11. If fail to connect pls check the subnet’s route table if there is a route to internet gateway, also check if the EC2 has a public DNS name and IP.
-
-
 ## Amazon EKS Cluster Setup
 1. Goto “EKS” in AWS console, ensure selected region is Hong Kong: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks1.png)
-2. Input the followings:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks2.png)
-3. Select the pre-defined VPC and subnets for the EKS cluster:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks3.png)
+2. Input the cluster name, Kubernetes version and service role:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks2.png)
+3. Select the VPC and subnets for the EKS cluster:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks3.png)
 4. Set the cluster security group, pick the default is fine:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks4.png)
 5. Allow private access to API server endpoint only:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks5.png)
 6. Set the below logging options and create the cluster:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks6.png)
 7. Wait for successful creation of cluster, which means cluster status = “active”:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks7.png)
 8. Scroll down to “Node Groups” and click “Add node group”:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks8.png)
-9. Set node group configuration, ensure multiple subnets are selected:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks9.png)
-10. Input SSH key pair for EKS worker nodes and add the security group of Bastion Host to access the worker nodes:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks10.png)
+9. Set node group configuration, ensure all subnets are selected:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks9.png)
+10. Input SSH key pair for EKS worker nodes and allow only the EKS cluster's security group for remote access:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks10.png)
 11. Set worker node compute configuration:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks11.png)
 12.	Set scaling configuration:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks12.png)
 13. Final step is review the group configuration and create, wait for the node group status become “active”:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks13.png)
 14. Goto EC2 dashboard, there should be 3 EC2 instances running:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks14.png)
-15. Now the EKS cluster setup is completed.
+
+## Bastion Host Setup
+A Bastion host (an EC2 instance) is setup in a public subnet of the EKS cluster's VPC, so that user from external networks can SSH to it and manage the EKS cluster using command line tool like eksctl, kubectl and helm.
+
+1. Goto EC2 dashboard, click “launch instance”
+2. Search “ami-03a9535798e343119”, this is a Linux AMI for a Bastion Host in HK region:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion2.png)
+3. Select instance type, t3.micro should be fine:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion3.png)
+4. Ensure a public subnet is selected:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion4.png)
+5. Add 30GB storage:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion5.png)
+6. Set security group, to allow SSH inbound traffic from internet:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion6.png)
+7. Create a key-pair and launch the instance:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion7.png)
+8. Check if the instance start successfully:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion8.png)
+9. Click actions -> networking -> change security groups, add the EKS cluster's security group.
+10. Click the instance and click connect, follow the instruction to SSH to the Bastion host.
+11. If fail to connect pls check the subnet’s route table if there is a route to internet gateway, also check if the instance has a public DNS name and IP.
+12. SSH to the instance, install the PostgesSQL client by
+```bash
+yum install postgresql-devel
+```
 
 ## Setup AWS CLI, eksctl, kubectl and helm
-1. The following steps are done in the Bastion Host instance.
-2. Run the below command to install and upgrade AWS Command Line Tool (CLI)
+1. The following steps are done in the Bastion host.
+2. Run the below command to install / upgrade AWS Command Line Tool (CLI)
 ```bash
 pip install awscli –upgrade –user
 ```
@@ -84,9 +86,9 @@ sudo mv /tmp/eksctl /usr/local/bin
 eksctl version
 ```
 7. Follow the below guide to setup kubectl, for Linux and Kubernetes 1.14: https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html
-8. To setup authentication between kubectl and the EKS cluster, use the AWS CLI update-kubeconfig command to create kubeconfig for your cluster, please replace **alfresco-prod** with your EKS cluster name:
+8. To setup authentication between kubectl and the EKS cluster, use the AWS CLI update-kubeconfig command to create kubeconfig for your cluster, please replace **acs** with your EKS cluster name:
 ```bash
-aws eks –region ap-east-1 update-kubeconfig –name alfresco-prod
+aws eks –region ap-east-1 update-kubeconfig –name acs
 ```
 9. Test your configuration:
 ```bash
@@ -102,19 +104,31 @@ EFS is mainly used to store the full text indexes of documents stored in Alfresc
 4. Click Actions -> Manage network access, add the EKS cluster security group to all mount targets: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/efs4.png)
 
 ## Amazon Aurora (PostgreSQL) Setup
-The Aurora database is used used to store meta-data of the documents in Alfresco content services.
+The Aurora database is used to store meta-data of the documents in Alfresco content services.
 1. Goto RDS in AWS console, click “create database” and choose engine type = “Aurora”:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds2.png)
 2. Choose Amazon Aurora with PostgreSQL compatibility:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds3.png)
-3. Input DB cluster name, master username and password, ensure you remember all of these:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds4.png)
+3. Input DB cluster name, db username and password:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds4.png)
 4. Choose the instance type:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds5.png)
 5. No need to create Aurora Replica:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds6.png)
 6. Select the VPC of EKS cluster:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds7.png)
 7. Ensure security group of EKS cluster is added and create the database: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds7b.png)
 8. Wait for Aurora database cluster to create successfully:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds8.png)
 9. Click the database cluster name and you can see the "write" database endpoint at the bottom: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds9.png)
+10. Login to the Bastion host and execute the following command to create a default database:
+```
+createdb -h <Aurora db cluster endpoint> -p 5432 -U <db username> <db username>
+```
+11. Connect to the Aurora's Postgres database by:
+```
+psql -h <Aurora db cluster endpoint> -p 5432 -U <db username> <db username>
+```
+12. If login successful, that means database setup successfully! and can quit the console by:
+```
+\q
+```
 
 ## AWS Certificate Manager Setup
-Data in transit between end user and alfresco system is protected by HTTPS, therefore a SSL/TLS certificate for the application domain is required.
+Data in transit between end user and alfresco digital platform is protected by HTTPS, therefore a SSL/TLS certificate for the application domain is required.
 1. Go to ACM in AWS console, choose provision a SSL/TLS certificate, and request a public certificate or import an existing one.
 2. After the certificate is issued/imported, drop down the ARN:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/acm3.png)
  
@@ -268,24 +282,23 @@ export ALF_DB_USER="alfresco"
 # Alfresco RDS database password
 export ALF_DB_PWD="alfrescopoc"
 
-# Install ACS on EKS cluster with external database point to RDS Aurora (PostgreSQL)
+# Install ACS on EKS cluster with S3 connector
 helm install alfresco-incubator/alfresco-content-services \
 --set externalProtocol="https" \
 --set externalHost="$EXTERNALHOST" \
 --set externalPort="443" \
 --set repository.adminPassword="$ALF_ADMIN_PWD" \
---set alfresco-infrastructure.persistence.efs.enabled=true \
---set alfresco-infrastructure.persistence.efs.dns="$EFS_SERVER" \
+--set alfresco-infrastructure.persistence.storageClass.enabled=true \
+--set alfresco-infrastructure.persistence.storageClass.name="nfs-client" \
+--set alfresco-infrastructure.alfresco-infrastructure.nginx-ingress.enabled=false \
 --set alfresco-search.resources.requests.memory="2500Mi",alfresco-search.resources.limits.memory="2500Mi" \
 --set alfresco-search.environment.SOLR_JAVA_MEM="-Xms2000M -Xmx2000M" \
---set persistence.repository.data.subPath="$DESIREDNAMESPACE/alfresco-content-services/repository-data" \
+--set postgresql.postgresPassword="$ALF_DB_PWD" \
 --set persistence.solr.data.subPath="$DESIREDNAMESPACE/alfresco-content-services/solr-data" \
---set postgresql.enabled=false \
---set database.external=true \
---set database.driver="org.postgresql.Driver" \
---set database.user="$ALF_DB_USER" \
---set database.password="$ALF_DB_PWD" \
---set database.url="jdbc:postgresql://$ALF_DB_URL" \
+--set persistence.repository.enabled=false \
+--set s3connector.enabled=true \
+--set s3connector.config.bucketName=hkt-alfresco-poc \
+--set s3connector.secrets.encryption=kms \
 --set global.alfrescoRegistryPullSecrets=quay-registry-secret \
 --namespace=$DESIREDNAMESPACE
 ```
@@ -298,13 +311,12 @@ You can access all components of Alfresco Content Services Community using the s
   Api-Explorer: https://myacs.exmaple.com:443/api-explorer
   Sync service: https://myacs.exmaple.com:443/syncservice/healthcheck 
 ```
-15. Check the installation status by following command:
+15. Check the installation status by following command, replace **acs** with your EKS cluster name
 ```
 kubectl get pods --namespace acs
 ```
 Keep checking until all pods' status changed to `Running`
-
-
+16. Go to the external host site, for example: https://myacs.myexample.com/share, the Alfresco content services site should be up and running.
 
 
 
