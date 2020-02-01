@@ -3,6 +3,12 @@
 ## Overview
 Alfresco Content Services (ACS) is the Enterprise Content Management module of Alfresco Digital Business Platform, which is running on a set of containerized applications on Kubernetes. This document explains how to setup a Kubernetes cluster on AWS's managed Kubernetes platform: EKS, with step by step guides to setup ACS 6.2 on EKS cluster, using tool like eksctl, kubectl and helm.
 
+## Reference Link
+This setup guide is based on the following sites:
+* https://docs.alfresco.com/6.1/tasks/deploy-helm-aws.html
+* https://github.com/Alfresco/acs-deployment/blob/master/docs/helm-deployment-aws_eks.md
+* https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html
+
 ## Prerequisites
 1. The setup is based on AWS's Hong Kong region.
 2. Please request AWS account user's access key ID and secret from account admin, they are required for authentication in AWS command line tool (CLI), admin can goto AWS Console -> IAM -> Users -> Security Credentials -> Access Key to create access key.
