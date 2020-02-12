@@ -7,6 +7,8 @@ Alfresco Content Services (ACS) is the Enterprise Content Management module of A
 This setup guide is based on the following sites:
 * https://docs.alfresco.com/6.2/tasks/deploy-helm-aws.html
 * https://github.com/Alfresco/acs-deployment/blob/master/docs/helm-deployment-aws_eks.md
+* https://github.com/Alfresco/acs-deployment/blob/master/docs/use-cases/acs-deployment-with-external-database-kops.md
+* https://github.com/Alfresco/acs-deployment/blob/master/docs/use-cases/acs-deployment-with-s3-connector-kops.md
 * https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html
 
 ## Prerequisites
