@@ -47,11 +47,11 @@ This setup guide is based on the following sites:
 13. Final step is review the group configuration and create, wait for the node group status become “active”:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks13.png)
 14. Goto EC2 dashboard, there should be 3 EC2 instances running:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/eks14.png)
 
-## Bastion Host Setup
-A Bastion host (an EC2 instance) is setup in a public subnet of the EKS cluster's VPC, so that user from external networks can SSH to it and manage the EKS cluster using command line tool like eksctl, kubectl and helm.
+## Jump Host Setup
+A Jump host (an EC2 instance) is setup in a public subnet of the EKS cluster's VPC, so that user from external networks can SSH to it and manage the EKS cluster using command line tool like eksctl, kubectl and helm.
 
 1. Goto EC2 dashboard, click “launch instance”
-2. Search “ami-03a9535798e343119”, this is a Linux AMI for a Bastion Host in HK region:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion2.png)
+2. Search “ami-03a9535798e343119”, this is a Linux AMI for a Jump Host in HK region:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion2.png)
 3. Select instance type, t3.micro should be fine:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion3.png)
 4. Ensure a public subnet is selected:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion4.png)
 5. Add 30GB storage:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion5.png)
@@ -59,7 +59,7 @@ A Bastion host (an EC2 instance) is setup in a public subnet of the EKS cluster'
 7. Create a key-pair and launch the instance:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion7.png)
 8. Check if the instance start successfully:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/bastion8.png)
 9. Click actions -> networking -> change security groups, add the EKS cluster's security group.
-10. Click the instance and click connect, follow the instruction to SSH to the Bastion host.
+10. Click the instance and click connect, follow the instruction to SSH to the Jump host.
 11. If fail to connect pls check the subnet’s route table if there is a route to internet gateway, also check if the instance has a public DNS name and IP.
 12. SSH to the instance, install the PostgesSQL client by
 ```bash
@@ -67,7 +67,7 @@ yum install postgresql-devel
 ```
 
 ## Setup AWS CLI, eksctl, kubectl and helm
-1. The following steps are done in the Bastion host.
+1. The following steps are done in the Jump host.
 2. Run the below command to install / upgrade AWS Command Line Tool (CLI)
 ```bash
 pip install awscli –upgrade –user
@@ -120,7 +120,7 @@ The Aurora database is used to store meta-data of the documents in Alfresco cont
 7. Ensure security group of EKS cluster is added and create the database: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds7b.png)
 8. Wait for Aurora database cluster to create successfully:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds8.png)
 9. Click the database cluster name and you can see the "write" database endpoint at the bottom: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds9.png)
-10. Login to the Bastion host and execute the following command to create a default database:
+10. Login to the Jump host and execute the following command to create a default database:
 ```
 createdb -h <Aurora db cluster endpoint> -p 5432 -U <db username> <db username>
 ```
@@ -288,7 +288,7 @@ export ALF_DB_USER="alfresco"
 # Alfresco RDS database password
 export ALF_DB_PWD="alfrescopoc"
 
-# Install ACS on EKS cluster with S3 connector
+# Install ACS on EKS cluster
 helm install alfresco-incubator/alfresco-content-services \
 --set externalProtocol="https" \
 --set externalHost="$EXTERNALHOST" \
@@ -300,11 +300,6 @@ helm install alfresco-incubator/alfresco-content-services \
 --set alfresco-search.resources.requests.memory="2500Mi",alfresco-search.resources.limits.memory="2500Mi" \
 --set alfresco-search.environment.SOLR_JAVA_MEM="-Xms2000M -Xmx2000M" \
 --set postgresql.postgresPassword="$ALF_DB_PWD" \
---set persistence.solr.data.subPath="$DESIREDNAMESPACE/alfresco-content-services/solr-data" \
---set persistence.repository.enabled=false \
---set s3connector.enabled=true \
---set s3connector.config.bucketName=hkt-alfresco-poc \
---set s3connector.secrets.encryption=kms \
 --set global.alfrescoRegistryPullSecrets=quay-registry-secret \
 --namespace=$DESIREDNAMESPACE
 ```
