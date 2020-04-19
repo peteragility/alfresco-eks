@@ -65,14 +65,16 @@ A Jump host (an EC2 instance) is setup in a public subnet of the EKS cluster's V
 11. If fail to connect pls check the subnet’s route table if there is a route to internet gateway, also check if the instance has a public DNS name and IP.
 12. SSH to the instance, install the PostgesSQL client by
 ```bash
-yum install postgresql-devel
+sudo yum install postgresql-devel
 ```
 
 ## Setup AWS CLI, eksctl, kubectl and helm
 1. The following steps are done in the Jump host.
 2. Run the below command to install / upgrade AWS Command Line Tool (CLI)
 ```bash
-pip install awscli –upgrade –user
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
 ```
 3. Setup AWS account credential for CLI by “AWS Configure”:
 ```
