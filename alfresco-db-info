@@ -1,0 +1,11 @@
+alfresco db info
+cluster name: alfresco
+master user: alfresco
+password: alfrescopoc
+cluster endpoint: alfresco.cluster-cwdhvtioj6ah.ap-east-1.rds.amazonaws.com
+
+efs endpoint: fs-08af45c5.efs.ap-east-1.amazonaws.com
+
+acs admin password: alfrescopoc!
+
+SSL cert ARN: arn:aws:acm:ap-east-1:057300157978:certificate/8e371ff8-f682-4701-aaff-403b0eb1b431

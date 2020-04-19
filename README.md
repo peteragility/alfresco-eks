@@ -95,10 +95,10 @@ sudo mv /tmp/eksctl /usr/local/bin
 ```bash
 eksctl version
 ```
-7. Follow the below guide to setup kubectl, for Linux and Kubernetes 1.14: https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html
+7. Follow the below guide to setup kubectl, for Linux and Kubernetes 1.15: https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html
 8. To setup authentication between kubectl and the EKS cluster, use the AWS CLI update-kubeconfig command to create kubeconfig for your cluster, please replace **acs** with your EKS cluster name:
 ```bash
-aws eks –region ap-east-1 update-kubeconfig –name acs
+aws eks --region ap-east-1 update-kubeconfig --name acs
 ```
 9. Test your configuration:
 ```bash
