@@ -108,12 +108,12 @@ kubectl get svc
 
 ## Amazon Elastic File System (EFS) Setup
 EFS is mainly used to store the full text indexes of documents stored in Alfresco content services (the Solr Indexes)
-1. Goto EFS in AWS console, select the VPC of EKS cluster and click all AZs: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/efs1.png)
+1. Goto EFS in AWS console, select the VPC of EKS cluster and click all AZs, ensure the EKS cluster security group is added : ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/efs1.png)
 2. Follow the setup process and create the EFS:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/efs2.png)
 3. After EFS is created please drop down the EFS DNS name:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/efs3.png)
 4. Click Actions -> Manage network access, add the EKS cluster security group to all mount targets: ![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/efs4.png)
 
-## Amazon Aurora (PostgreSQL) Setup
+## Amazon Aurora (PostgreSQL) Setup (Optional)
 The Aurora database is used to store meta-data of the documents in Alfresco content services.
 1. Goto RDS in AWS console, click “create database” and choose engine type = “Aurora”:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds2.png)
 2. Choose Amazon Aurora with PostgreSQL compatibility:![](https://raw.githubusercontent.com/peterone928/alfresco-eks/master/images/rds3.png)
